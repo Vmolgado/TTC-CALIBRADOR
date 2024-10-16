@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calibración Manual - CALIBRADOR ONLINE</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            background-color: #fff; /* Fondo blanco */
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #000; /* Color negro */
+            color: #fff; /* Color blanco */
+            text-align: center;
+            padding: 20px 0; /* Espacio para separar etiquetas */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1000; /* Asegura que el header esté por encima del resto del contenido */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .header img {
+            position: absolute;
+            left: 20px;
+            top: 10px;
+            height: 55px;
+        }
+        .header h1 {
+            margin: 0;
+            flex-grow: 1; /* Permite que el título crezca y ocupe el espacio disponible */
+        }
+        .header .date {
+            position: absolute;
+            right: 20px;
+            bottom: 10px;
+            font-size: 0.9em;
+        }
+        .header .logout-text {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            color: #dc3545; /* Color rojo */
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+        }
+        .header .logout-text:hover {
+            text-decoration: underline; /* Subraya el texto al pasar el mouse */
+        }
+        .main-content {
+            display: flex;
+            margin-top: 100px; /* Para evitar que el contenido quede bajo el header */
+            justify-content: flex-start; /* Alinea los elementos principales a la izquierda */
+            padding: 20px;
+            width: 100%;
+        }
+        .container {
+            background-color: #fff; /* Fondo blanco */
+            padding: 20px 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 1000px; /* Mantén el ancho del contenedor */
+            margin-right: auto; /* Alinea a la izquierda */
+            flex: 1;
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .section {
+            width: 30%; /* Ajustar el ancho de cada sección */
+            text-align: left;
+        }
+        .section-header {
+            font-weight: bold;
+            padding: 10px;
+            color: #fff; /* Letra blanca */
+            text-align: center;
+            margin-bottom: 20px; /* Separación adicional */
+            background-color: #6c757d; /* Fondo gris */
+            border-radius: 4px; /* Bordes redondeados */
+        }
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        label {
+            display: block;
+            margin-bottom: 3px;
+            font-weight: bold;
+        }
+        select, input {
+            padding: 8px;
+            width: calc(100% - 16px);
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+        table {
+            width: auto; /* Ajusta el ancho de la tabla automáticamente */
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        table, th, td {
+            border: 1px solid #000; /* Contorno negro */
+        }
+        th, td {
+            padding: 5px 10px; /* Ajusta el tamaño de las celdas */
+            text-align: center;
+            white-space: nowrap; /* Evita que el texto se desborde */
+            font-size: 1em; /* Tamaño uniforme del texto */
+            vertical-align: middle; /* Centra el texto verticalmente */
+        }
+        th {
+            background-color: #004d4d; /* Fondo color petróleo */
+            color: #fff; /* Letra blanca */
+            font-weight: bold;
+        }
+        h2 {
+            text-align: center; /* Centra el texto de la etiqueta */
+        }
+        .editable {
+            border: 0.9px solid #ccc;
+            padding: 3px;
+            text-align: center; /* Centrar el texto dentro del campo editable */
+            font-size: 1em; /* Tamaño de la fuente */
+        }
+        /* Estilo para los botones */
+        .botones-izquierda {
+            display: flex;
+            gap: 10px; /* Espacio entre botones */
+        }
+        .botones-derecha {
+            display: flex;
+            justify-content: flex-end;
+        }
+        button.exportar-tabla, button.calcular-volumen, button.agregar-fila, button.eliminar-fila, button.limpiar-tabla, button.exportar-datos {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 20px;
+            color: #fff;
+        }
+
+        button.exportar-tabla {
+            background-color: #28a745; /* Verde */
+        }
+
+        button.exportar-tabla:hover {
+            background-color: #218838;
+        }
+
+        button.calcular-volumen {
+            background-color: #007bff; /* Azul */
+        }
+
+        button.calcular-volumen:hover {
+            background-color: #0056b3;
+        }
+
+        button.agregar-fila {
+            background-color: #004d4d; /* Petróleo */
+        }
+
+        button.agregar-fila:hover {
+            background-color: #003737;
+        }
+
+        button.eliminar-fila {
+            background-color: #dc3545; /* Rojo */
+        }
+
+        button.eliminar-fila:hover {
+            background-color: #c82333;
+        }
+
+        button.limpiar-tabla {
+            background-color: #6c757d; /* Gris */
+        }
+
+        button.limpiar-tabla:hover {
+            background-color: #5a6268;
+        }
+
+        button.exportar-datos {
+            background-color: #ffc107; /* Amarillo */
+        }
+
+        button.exportar-datos:hover {
+            background-color: #e0a800;
+        }
+
+        .botonera {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+    </style>
+    <!-- Importa la biblioteca jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <img src="logo.png" alt="Logo"> 
+        <h1>CALIBRACIÓN MANUAL</h1>
+        <div class="date" id="fecha"></div>
+        <span class="logout-text" onclick="cerrarSesion()">Log Out</span>
+    </div>
+    <div class="main-content">
+        <div class="container">
+            <div class="row">
+                <div class="section service-section">
+                    <div class="section-header">DATOS SERVICIO</div>
+                    <div class="form-group">
+                        <label for="fechaServicio">Fecha</label>
+                        <input type="date" id="fechaServicio">
+                    </div>
+                    <div class="form-group">
+                        <label for="sd">SD</label>
+                        <input type="text" id="sd" placeholder="Ingrese SD">
+                    </div>
+                    <div class="form-group">
+                        <label for="unidad">Unidad</label>
+                        <input type="text" id="unidad" placeholder="Ingrese Unidad">
+                    </div>
+                    <div class="form-group">
+                        <label for="calibrador">Calibrador</label>
+                        <input type="text" id="calibrador" placeholder="Ingrese Calibrador">
+                    </div>
+                    <div class="form-group">
+                        <label for="marcaSensor">Marca de Sensor</label>
+                        <select id="marcaSensor">
+                            <option value="">Seleccione marca de sensor</option>
+                            <option value="Cnocote">Cnocote</option>
+                            <option value="Omnicomm">Omnicomm</option>
+                            <option value="Ligo">Ligo</option>
+                            <option value="Escort">Escort</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="section sensor-section">
+                    <div class="section-header">DATOS SENSOR</div>
+                    <div class="form-group">
+                        <label for="tipoSensor">Tipo de Sensor</label>
+                        <select id="tipoSensor">
+                            <option value="">Seleccione un tipo de sensor</option>
+                            <option value="Análogo">Análogo</option>
+                            <option value="Digital">Digital</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="rangoVoltaje">Rango de Voltaje (v)</label>
+                        <select id="rangoVoltaje" required>
+                            <option value="">Seleccione un rango de voltaje</option>
+                            <option value="0 - 5">0 - 5</option>
+                            <option value="0.5 - 4.5">0.5 - 4.5</option>
+                            <option value="0 - 10">0 - 10</option>
+                            <option value="0 - 4095">0 - 4095</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="paramVacio">Parámetro en Vacío (v)</label>
+                        <input type="number" id="paramVacio" placeholder="Ingrese el parámetro en vacío" required oninput="actualizarTabla()">
+                    </div>
+                    <div class="form-group">
+                        <label for="paramLleno">Parámetro en Lleno (v)</label>
+                        <input type="number" id="paramLleno" placeholder="Ingrese el parámetro en lleno" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="largoSensor">Largo del Sensor (cm)</label>
+                        <input type="number" id="largoSensor" placeholder="Ingrese el largo del sensor en cm" required>
+                    </div>
+                </div>
+                <div class="section tank-section">
+                    <div class="section-header">DATOS TANQUE</div>
+                    <div class="form-group">
+                        <label for="marcaTractocamion">Marca Tractocamión</label>
+                        <input type="text" id="marcaTractocamion" placeholder="Ingrese la marca del tractocamión">
+                    </div>
+                    <div class="form-group">
+                        <label for="formaTanque">Forma Tanque</label>
+                        <select id="formaTanque">
+                            <option value="">Seleccione la forma del tanque</option>
+                            <option value="Cilindrico">Cilíndrico</option>
+                            <option value="Cuadrado">Cuadrado</option>
+                            <option value="Amorfo">Amorfo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="diametro">Diámetro (cm)</label>
+                        <input type="number" id="diametro" placeholder="Ingrese el diámetro en cm" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="longitud">Longitud (cm)</label>
+                        <input type="number" id="longitud" placeholder="Ingrese la longitud en cm" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="numeroTanque">Número de Tanque</label>
+                        <input type="text" id="numeroTanque" placeholder="Ingrese el número de tanque">
+                    </div>
+                </div>
+            </div>
+            <h2>Tabla de Calibración</h2>
+            <table id="calibracionTabla">
+                <thead>
+                    <tr>
+                        <th>Voltaje</th>
+                        <th>Litros</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="voltajeVacio">0</td>
+                        <td>0</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="botonera">
+                <div class="botones-izquierda">
+                    <button class="limpiar-tabla" onclick="limpiarTabla()">Limpiar Tabla</button>
+                    <button class="eliminar-fila" onclick="eliminarFila()">Eliminar Fila</button>
+                    <button class="agregar-fila" onclick="agregarFila()">Agregar Fila</button>
+                </div>
+                <div class="botones-derecha">
+                    <button class="exportar-datos" onclick="exportarDatos()">Exportar Datos</button>
+                    <button class="exportar-tabla" onclick="exportarTabla()">Exportar Tabla</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function cerrarSesion() {
+            sessionStorage.removeItem('authenticated');
+            window.location.href = 'login.html';
+        }
+
+        function mostrarFecha() {
+            const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            const fecha = new Date();
+            const diaSemana = diasSemana[fecha.getDay()];
+            const dia = String(fecha.getDate()).padStart(2, '0');
+            const mes = meses[fecha.getMonth()];
+            const anio = fecha.getFullYear();
+            const fechaFormateada = `${diaSemana} ${dia} de ${mes} de ${anio}`;
+            document.getElementById('fecha').innerText = fechaFormateada;
+        }
+
+        window.onload = function() {
+            mostrarFecha();
+            actualizarTabla();
+        }
+
+        function actualizarTabla() {
+            const paramVacio = document.getElementById("paramVacio").value || 0;
+            document.getElementById("voltajeVacio").textContent = paramVacio;
+        }
+
+        function agregarFila() {
+            const tabla = document.getElementById("calibracionTabla").getElementsByTagName('tbody')[0];
+
+            const ultimaFila = tabla.rows[tabla.rows.length - 1];
+            const ultimoLitro = parseInt(ultimaFila.cells[1].textContent) || 0;
+            const nuevoLitro = ultimoLitro + 20;
+
+            const fila = tabla.insertRow();
+            const celdaVoltaje = fila.insertCell(0);
+            const celdaLitros = fila.insertCell(1);
+
+            // Agregamos el campo de entrada editable para el voltaje
+            celdaVoltaje.innerHTML = '<input type="text" class="editable" style="width: 100%; text-align: center;" />';
+            celdaLitros.textContent = nuevoLitro;
+        }
+
+        function eliminarFila() {
+            const tabla = document.getElementById("calibracionTabla").getElementsByTagName('tbody')[0];
+            if (tabla.rows.length > 1) {
+                tabla.deleteRow(tabla.rows.length - 1); // Elimina la última fila
+            } else {
+                alert("No se puede eliminar la fila inicial.");
+            }
+        }
+
+        function limpiarTabla() {
+            const tabla = document.getElementById("calibracionTabla").getElementsByTagName('tbody')[0];
+            while (tabla.rows.length > 1) {
+                tabla.deleteRow(1); // Mantiene la primera fila (fila de referencia)
+            }
+            document.getElementById("voltajeVacio").textContent = "0"; // Resetea el voltaje a 0
+        }
+
+        function exportarTabla() {
+            const tabla = document.getElementById("calibracionTabla");
+            let contenido = "";
+
+            for (let i = 1; i < tabla.rows.length; i++) {
+                const celdas = tabla.rows[i].cells;
+                const voltaje = celdas[0].textContent || celdas[0].querySelector('input').value;
+                const litros = celdas[1].textContent;
+                contenido += `${voltaje}\t${litros}\n`;
+            }
+
+            const a = document.createElement("a");
+            const archivo = new Blob([contenido], { type: 'text/plain' });
+            a.href = URL.createObjectURL(archivo);
+            a.download = "tabla_calibracion.txt";
+            a.click();
+        }
+
+        function exportarDatos() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const fechaServicio = document.getElementById('fechaServicio').value;
+            const sd = document.getElementById('sd').value;
+            const unidad = document.getElementById('unidad').value;
+            const calibrador = document.getElementById('calibrador').value;
+            const marcaSensor = document.getElementById('marcaSensor').value;
+            const tipoSensor = document.getElementById('tipoSensor').value;
+            const rangoVoltaje = document.getElementById('rangoVoltaje').value;
+            const paramVacio = document.getElementById('paramVacio').value;
+            const paramLleno = document.getElementById('paramLleno').value;
+            const largoSensor = document.getElementById('largoSensor').value;
+            const marcaTractocamion = document.getElementById('marcaTractocamion').value;
+            const formaTanque = document.getElementById('formaTanque').value;
+            const diametro = document.getElementById('diametro').value;
+            const longitud = document.getElementById('longitud').value;
+            const numeroTanque = document.getElementById('numeroTanque').value;
+
+            doc.text(`Datos del Servicio`, 10, 10);
+            doc.text(`Fecha de Servicio: ${fechaServicio}`, 10, 20);
+            doc.text(`SD: ${sd}`, 10, 30);
+            doc.text(`Unidad: ${unidad}`, 10, 40);
+            doc.text(`Calibrador: ${calibrador}`, 10, 50);
+
+            doc.text(`Datos del Sensor`, 10, 60);
+            doc.text(`Marca de Sensor: ${marcaSensor}`, 10, 70);
+            doc.text(`Tipo de Sensor: ${tipoSensor}`, 10, 80);
+            doc.text(`Rango de Voltaje: ${rangoVoltaje}`, 10, 90);
+            doc.text(`Parámetro en Vacío: ${paramVacio}`, 10, 100);
+            doc.text(`Parámetro en Lleno: ${paramLleno}`, 10, 110);
+            doc.text(`Largo del Sensor: ${largoSensor} cm`, 10, 120);
+
+            doc.text(`Datos del Tanque`, 10, 130);
+            doc.text(`Marca del Tractocamión: ${marcaTractocamion}`, 10, 140);
+            doc.text(`Forma del Tanque: ${formaTanque}`, 10, 150);
+            doc.text(`Diámetro: ${diametro} cm`, 10, 160);
+            doc.text(`Longitud: ${longitud} cm`, 10, 170);
+            doc.text(`Número de Tanque: ${numeroTanque}`, 10, 180);
+
+            doc.save('datos_calibracion.pdf');
+        }
+    </script>
+</body>
+</html>

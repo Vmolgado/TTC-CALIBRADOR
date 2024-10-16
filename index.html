@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CALIBRADOR ONLINE</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            background-color: #fff;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #000;
+            color: #fff;
+            text-align: center;
+            padding: 20px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .header img {
+            position: absolute;
+            left: 20px;
+            top: 10px;
+            height: 55px;
+        }
+        .header h1 {
+            margin: 0;
+            flex-grow: 1;
+        }
+        .header .date {
+            position: absolute;
+            right: 20px;
+            bottom: 10px;
+            font-size: 0.9em;
+        }
+        .header .logout-text {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+        }
+        .header .logout-text:hover {
+            text-decoration: underline;
+        }
+        .main-content {
+            display: flex;
+            margin-top: 100px;
+            justify-content: flex-start;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 1000px;
+            margin-right: auto;
+            flex: 1;
+        }
+        .sidebar {
+            width: 200px;
+            margin-left: 2px;
+        }
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .button-group button {
+            padding: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            width: 65%;
+        }
+        .button-group .calcular {
+            background-color: #28a745;
+            color: white;
+        }
+        .button-group .calcular:hover {
+            background-color: #218838;
+        }
+        .button-group .limpiar {
+            background-color: #6c757d;
+            color: white;
+        }
+        .button-group .limpiar:hover {
+            background-color: #5a6268;
+        }
+        .button-group .exportar {
+            background-color: #ffc107;
+            color: white;
+        }
+        .button-group .exportar:hover {
+            background-color: #e0a800;
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .section {
+            width: 30%;
+            text-align: left;
+        }
+        .section-header {
+            font-weight: bold;
+            padding: 10px;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 20px;
+            background-color: #6c757d;
+            border-radius: 4px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        label {
+            display: block;
+            margin-bottom: 3px;
+            font-weight: bold;
+        }
+        select, input {
+            padding: 8px;
+            width: calc(100% - 16px);
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            text-align: center;
+        }
+        .result b {
+            font-weight: bold;
+        }
+        #customValue {
+            display: none;
+        }
+        .tank-wrapper {
+            position: relative;
+            width: 300px;
+            margin: 20px auto;
+            overflow: visible;
+        }
+        .tank {
+            width: 100%;
+            height: 150px;
+            border: 2px solid #333;
+            border-radius: 75px / 50px;
+            position: relative;
+            background-color: #f3f3f3;
+            display: flex;
+            align-items: flex-end;
+            overflow: hidden;
+        }
+        .fuel-level {
+            width: 100%;
+            background-color: #FFBF00;
+            position: absolute;
+            bottom: 0;
+            height: 0;
+            transition: height 2s ease;
+        }
+        .sensor-line {
+            position: absolute;
+            top: -1px;
+            bottom: 0;
+            width: 4px;
+            background-color: black;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .sensor-label {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8em;
+            font-weight: bold;
+            color: black;
+            white-space: nowrap;
+        }
+        .sensor-head {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            width: 15px;
+            height: 10px;
+            background-color: black;
+            border-radius: 0;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+        .footer {
+            background-color: #fff;
+            padding: 20px 0;
+            text-align: center;
+            border-top: 1px solid #ccc;
+        }
+        .footer img {
+            height: 15px;
+            vertical-align: middle;
+        }
+        .footer span {
+            font-size: 0.7em;
+            vertical-align: middle;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        if (!sessionStorage.getItem('authenticated')) {
+            window.location.href = 'login.html';
+        }
+
+        function toggleCustomValue() {
+            const rangoVoltaje = document.getElementById('rangoVoltaje');
+            const customValue = document.getElementById('customValue');
+            if (rangoVoltaje.value === 'Personalizado') {
+                customValue.style.display = 'block';
+            } else {
+                customValue.style.display = 'none';
+                customValue.value = '';
+            }
+        }
+
+        function calcularVolumen() {
+            const diametroCm = parseFloat(document.getElementById('diametro').value);
+            const longitudCm = parseFloat(document.getElementById('longitud').value);
+            const formaTanque = document.getElementById('formaTanque').value;
+
+            if (formaTanque === 'Amorfo') {
+                alert("No se puede generar cálculo, se requiere calibración manual");
+                return;
+            }
+
+            if (isNaN(diametroCm) || isNaN(longitudCm) || diametroCm <= 0 || longitudCm <= 0 || formaTanque === '') {
+                alert("Por favor, ingrese valores válidos para todos los campos.");
+                return;
+            }
+
+            const diametroM = diametroCm / 100;
+            const longitudM = longitudCm / 100;
+            const radioM = diametroM / 2;
+            const volumenMetrosCubicos = Math.PI * Math.pow(radioM, 2) * longitudM;
+            const volumenLitros = volumenMetrosCubicos * 1000;
+
+            let resultado = `<b>Resultado:</b>\nLa capacidad del tanque es ${volumenLitros.toFixed(2)} litros.`;
+
+            document.getElementById('resultado').innerHTML = resultado.replace(/\n/g, '<br>');
+            document.querySelector('.exportar').style.display = 'block';
+
+            generarTabla(volumenLitros);
+            animarTanque(volumenLitros);
+        }
+
+        function generarTabla(capacidad) {
+            const voltajes = [];
+            const litros = [];
+            const numPuntos = 100;
+
+            const paramVacio = parseFloat(document.getElementById('paramVacio').value);
+            const paramLleno = parseFloat(document.getElementById('paramLleno').value);
+            const marcaSensor = document.getElementById('marcaSensor').value;
+            const largoSensor = document.getElementById('largoSensor').value;
+            const diametro = document.getElementById('diametro').value;
+            const longitud = document.getElementById('longitud').value;
+
+            if (isNaN(paramVacio) || isNaN(paramLleno)) {
+                alert("Por favor, ingrese valores válidos para 'Parámetro en Vacío' y 'Parámetro en Lleno'.");
+                return;
+            }
+
+            for (let i = 0; i <= numPuntos; i++) {
+                let voltaje = paramVacio + (i / numPuntos) * (paramLleno - paramVacio);
+                let litro = (i / numPuntos) * capacidad;
+                voltajes.push(voltaje.toFixed(2));
+                litros.push(litro.toFixed(2));
+            }
+
+            let contenido = "";
+            for (let i = 0; i <= numPuntos; i++) {
+                contenido += `${voltajes[i]}\t${litros[i]}\n`;
+            }
+
+            const nombreArchivo = `Tabla_${marcaSensor}_Sensor-${largoSensor}_Diametro-${diametro}_Longitud-${longitud}.txt`;
+            descargarArchivo(nombreArchivo, contenido);
+        }
+
+        function descargarArchivo(nombre, contenido) {
+            const a = document.createElement("a");
+            const archivo = new Blob([contenido], {type: 'text/plain'});
+            a.href = URL.createObjectURL(archivo);
+            a.download = nombre;
+            a.click();
+        }
+
+        function exportarDatos() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const tipoSensor = document.getElementById('tipoSensor').value;
+            const rangoVoltaje = document.getElementById('rangoVoltaje').value === 'Personalizado' ? document.getElementById('customValue').value : document.getElementById('rangoVoltaje').value;
+            const paramVacio = parseFloat(document.getElementById('paramVacio').value);
+            const paramLleno = parseFloat(document.getElementById('paramLleno').value);
+            const largoSensor = parseFloat(document.getElementById('largoSensor').value);
+            const marcaTractocamion = document.getElementById('marcaTractocamion').value;
+            const formaTanque = document.getElementById('formaTanque').value;
+            const diametroCm = parseFloat(document.getElementById('diametro').value);
+            const longitudCm = parseFloat(document.getElementById('longitud').value);
+            const numeroTanque = document.getElementById('numeroTanque').value;
+            const fechaServicio = document.getElementById('fechaServicio').value;
+            const sd = document.getElementById('sd').value;
+            const unidad = document.getElementById('unidad').value;
+            const calibrador = document.getElementById('calibrador').value;
+            const marcaSensor = document.getElementById('marcaSensor').value;
+
+            if (
+                tipoSensor === '' || rangoVoltaje === '' || isNaN(paramVacio) ||
+                isNaN(paramLleno) || isNaN(largoSensor) || marcaTractocamion === '' ||
+                formaTanque === '' || isNaN(diametroCm) || isNaN(longitudCm) ||
+                fechaServicio === '' || sd === '' || unidad === '' || calibrador === '' ||
+                marcaSensor === '' || numeroTanque === ''
+            ) {
+                alert("Por favor, ingrese valores válidos para todos los campos.");
+                return;
+            }
+
+            const diametroM = diametroCm / 100;
+            const longitudM = longitudCm / 100;
+            const radioM = diametroM / 2;
+            const volumenMetrosCubicos = Math.PI * Math.pow(radioM, 2) * longitudM;
+            const volumenLitros = volumenMetrosCubicos * 1000;
+
+            doc.text(`Datos del Servicio:`, 10, 10);
+            doc.text(`Fecha: ${fechaServicio}`, 10, 20);
+            doc.text(`SD: ${sd}`, 10, 30);
+            doc.text(`Unidad: ${unidad}`, 10, 40);
+            doc.text(`Calibrador: ${calibrador}`, 10, 50);
+            doc.text(`Marca de Sensor: ${marcaSensor}`, 10, 60);
+
+            doc.text(`Datos del Sensor:`, 10, 70);
+            doc.text(`Tipo de Sensor: ${tipoSensor}`, 10, 80);
+            doc.text(`Rango de Voltaje: ${rangoVoltaje} v`, 10, 90);
+            doc.text(`Parámetro en Vacío: ${paramVacio} v`, 10, 100);
+            doc.text(`Parámetro en Lleno: ${paramLleno} v`, 10, 110);
+            doc.text(`Largo del Sensor: ${largoSensor} cm`, 10, 120);
+
+            doc.text(`Datos del Tanque:`, 10, 130);
+            doc.text(`Marca Tractocamión: ${marcaTractocamion}`, 10, 140);
+            doc.text(`Forma del Tanque: ${formaTanque}`, 10, 150);
+            doc.text(`Diámetro: ${diametroCm} cm`, 10, 160);
+            doc.text(`Longitud: ${longitudCm} cm`, 10, 170);
+            doc.text(`Número de Tanque: ${numeroTanque}`, 10, 180);
+
+            let resultado = `La capacidad del tanque es ${volumenLitros.toFixed(2)} litros.`;
+            doc.text(resultado, 10, 190);
+
+            doc.save('resultado_y_tabla.pdf');
+        }
+
+        function limpiarDatos() {
+            document.getElementById('tipoSensor').value = '';
+            document.getElementById('rangoVoltaje').value = '';
+            document.getElementById('customValue').value = '';
+            document.getElementById('paramVacio').value = '';
+            document.getElementById('paramLleno').value = '';
+            document.getElementById('largoSensor').value = '';
+            document.getElementById('diametro').value = '';
+            document.getElementById('longitud').value = '';
+            document.getElementById('formaTanque').value = '';
+            document.getElementById('marcaTractocamion').value = '';
+            document.getElementById('numeroTanque').value = '';
+            document.getElementById('fechaServicio').value = '';
+            document.getElementById('sd').value = '';
+            document.getElementById('unidad').value = '';
+            document.getElementById('calibrador').value = '';
+            document.getElementById('marcaSensor').value = '';
+            document.getElementById('resultado').innerHTML = '';
+            document.querySelector('.exportar').style.display = 'none';
+            resetAnimacionTanque();
+        }
+
+        function resetAnimacionTanque() {
+            const fuelLevel = document.querySelector('.fuel-level');
+            fuelLevel.style.height = '0';
+            document.querySelector('.sensor-label').innerText = '';
+        }
+
+       function animarTanque(volumenLitros) {
+    const maxCapacity = 1000;
+    const fuelLevel = document.querySelector('.fuel-level');
+    
+    const heightPercentage = 100;
+
+    fuelLevel.style.height = heightPercentage + '%';
+
+    const largoSensor = document.getElementById('largoSensor').value;
+    document.querySelector('.sensor-label').innerText = `Largo del Sensor: ${largoSensor} cm`;
+}
+
+        function cerrarSesion() {
+            sessionStorage.removeItem('authenticated');
+            window.location.href = 'login.html';
+        }
+
+        function mostrarFecha() {
+            const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            const fecha = new Date();
+            const diaSemana = diasSemana[fecha.getDay()];
+            const dia = String(fecha.getDate()).padStart(2, '0');
+            const mes = meses[fecha.getMonth()];
+            const anio = fecha.getFullYear();
+            const fechaFormateada = `${diaSemana} ${dia} de ${mes} de ${anio}`;
+            document.getElementById('fecha').innerText = fechaFormateada;
+        }
+
+        window.onload = mostrarFecha;
+    </script>
+</head>
+<body>
+    <div class="header">
+        <img src="logo.png" alt="Logo"> 
+        <h1>CALIBRACIÓN VIRTUAL</h1>
+        <div class="date" id="fecha"></div>
+        <span class="logout-text" onclick="cerrarSesion()">Log Out</span>
+    </div>
+    <div class="main-content">
+        <div class="container">
+            <div class="row">
+                <div class="section service-section">
+                    <div class="section-header">DATOS SERVICIO</div>
+                    <div class="form-group">
+                        <label for="fechaServicio">Fecha</label>
+                        <input type="date" id="fechaServicio">
+                    </div>
+                    <div class="form-group">
+                        <label for="sd">SD</label>
+                        <input type="text" id="sd" placeholder="Ingrese SD">
+                    </div>
+                    <div class="form-group">
+                        <label for="unidad">Unidad</label>
+                        <input type="text" id="unidad" placeholder="Ingrese Unidad">
+                    </div>
+                    <div class="form-group">
+                        <label for="calibrador">Calibrador</label>
+                        <input type="text" id="calibrador" placeholder="Ingrese Calibrador">
+                    </div>
+                    <div class="form-group">
+                        <label for="marcaSensor">Marca de Sensor</label>
+                        <select id="marcaSensor">
+                            <option value="">Seleccione marca de sensor</option>
+                            <option value="Cnocote">Cnocote</option>
+                            <option value="Omnicomm">Omnicomm</option>
+                            <option value="Ligo">Ligo</option>
+                            <option value="Escort">Escort</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="section sensor-section">
+                    <div class="section-header">DATOS SENSOR</div>
+                    <div class="form-group">
+                        <label for="tipoSensor">Tipo de Sensor</label>
+                        <select id="tipoSensor">
+                            <option value="">Seleccione un tipo de sensor</option>
+                            <option value="Análogo">Análogo</option>
+                            <option value="Digital">Digital</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="rangoVoltaje">Rango de Voltaje (v)</label>
+                        <select id="rangoVoltaje" onchange="toggleCustomValue()" required>
+                            <option value="">Seleccione un rango de voltaje</option>
+                            <option value="0 - 5">0 - 5</option>
+                            <option value="0.5 - 4.5">0.5 - 4.5</option>
+                            <option value="0.5 - 10">0.5 - 10</option>
+                            <option value="0 - 4095">0 - 4095</option>
+                            <option value="Personalizado">Personalizado</option>
+                        </select>
+                        <input type="text" id="customValue" placeholder="Ingrese el valor personalizado">
+                    </div>
+                    <div class="form-group">
+                        <label for="paramVacio">Parámetro en Vacío (v)</label>
+                        <input type="number" id="paramVacio" placeholder="Ingrese el parámetro en vacío" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="paramLleno">Parámetro en Lleno (v)</label>
+                        <input type="number" id="paramLleno" placeholder="Ingrese el parámetro en lleno" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="largoSensor">Largo del Sensor (cm)</label>
+                        <input type="number" id="largoSensor" placeholder="Ingrese el largo del sensor en cm" required>
+                    </div>
+                </div>
+                <div class="section tank-section">
+                    <div class="section-header">DATOS TANQUE</div>
+                    <div class="form-group">
+                        <label for="marcaTractocamion">Marca Tractocamión</label>
+                        <input type="text" id="marcaTractocamion" placeholder="Ingrese la marca del tractocamión">
+                    </div>
+                    <div class="form-group">
+                        <label for="formaTanque">Forma Tanque</label>
+                        <select id="formaTanque">
+                            <option value="">Seleccione la forma del tanque</option>
+                            <option value="Cilindrico">Cilíndrico</option>
+                            <option value="Cuadrado">Cuadrado</option>
+                            <option value="Amorfo">Amorfo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="diametro">Diámetro (cm)</label>
+                        <input type="number" id="diametro" placeholder="Ingrese el diámetro en cm" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="longitud">Longitud (cm)</label>
+                        <input type="number" id="longitud" placeholder="Ingrese la longitud en cm" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="numeroTanque">Número de Tanque</label>
+                        <input type="text" id="numeroTanque" placeholder="Ingrese el número de tanque">
+                    </div>
+                </div>
+            </div>
+            <div class="result" id="resultado"></div>
+
+            <div class="tank-wrapper">
+                <div class="tank">
+                    <div class="fuel-level"></div>
+                    <div class="sensor-line"></div>
+                </div>
+                <div class="sensor-head"></div>
+                <div class="sensor-label"></div>
+            </div>
+        </div>
+        <div class="sidebar">
+            <div class="button-group">
+                <button class="calcular" onclick="calcularVolumen()">Calcular</button>
+                <button class="limpiar" onclick="limpiarDatos()">Limpiar Todo</button>
+                <button class="exportar" onclick="exportarDatos()">Exportar Datos</button>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <img src="logofot.png" alt="AVL MOLGADO 2024">
+        <span>AVL MOLGADO 2024</span>
+    </div>
+</body>
+</html>
